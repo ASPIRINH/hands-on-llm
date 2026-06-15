@@ -1,0 +1,216 @@
+# （一）站稳脚：用Scikit-learn跑通第一条Pipeline
+
+> 从CSV到模型，一个完整的ML项目长什么样
+
+---
+
+你装好了Python，跑通了Ollama，手上有一本《动手学深度学习》的克隆。但你可能还在想一个问题：**机器学习项目，到底是怎么从零跑到尾的？**
+
+网上有大量教程教你怎么调 `fit()` 和 `predict()`，但很少有教程把你从"有一个CSV文件"带到"训练出一个模型并知道它好不好用"。这篇就是来补这个缺的。
+
+选一个最经典的入门数据集——泰坦尼克号。不是因为它有趣，是因为它小（只有891行）、干净（不需要分布式处理）、而且足够展示一条完整的ML Pipeline长什么样。
+
+---
+
+## 从Pandas开始：把数据拿过来
+
+```
+import pandas as pd
+import numpy as np
+import os
+import urllib.request
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+
+# 下载到本地（跨平台路径）
+data_dir = os.path.expanduser("~/data")
+os.makedirs(data_dir, exist_ok=True)
+file_path = os.path.join(data_dir, 'titanic.csv')
+
+if not os.path.exists(file_path):
+    url = 'https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv'
+    urllib.request.urlretrieve(url, file_path)
+
+df = pd.read_csv(file_path)
+df.head()
+```
+
+如果你能看到五列数据——Survived、Pclass、Sex、Age、Fare——说明环境没问题。终端里应该出现这样的表格：
+
+```
+   PassengerId  Survived  Pclass  ...     Fare Cabin  Embarked
+0            1         0       3  ...   7.2500   NaN         S
+1            2         1       1  ...  71.2833   C85         C
+2            3         1       3  ...   7.9250   NaN         S
+3            4         1       1  ...  53.1000  C123         S
+4            5         0       3  ...   8.0500   NaN         S
+```
+
+**这里有个很多人会忽略的点**：先看数据长什么样，别急着建模。看看每一列有多少空值、数据类型是什么、数值分布怎么样：
+
+```
+print(df.info())
+# df.describe()
+```
+
+`df.info()` 会告诉你每一列有多少非空值：
+
+```
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 891 entries, 0 to 890
+Data columns (total 12 columns):
+PassengerId    891 non-null int64
+Survived       891 non-null int64
+Pclass         891 non-null int64
+Name           891 non-null object
+Sex            891 non-null object
+Age            714 non-null float64
+SibSp          891 non-null int64
+Parch          891 non-null int64
+Fare           891 non-null float64
+Cabin          204 non-null object
+Embarked       889 non-null object
+```
+
+你会发现Age列有177个空值（891 - 714 = 177），Cabin列更是惨不忍睹（只有204个非空）。这些空值会在训练时报错，所以必须处理。
+
+---
+
+## 特征工程：把原始数据变成模型能消化的格式
+
+机器学习的核心不是算法，是你怎么把原始信息变成数字。
+
+```
+# 选几列能用的特征
+features = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare']
+
+# 填充空值——用中位数比用均值更鲁棒
+df['Age'] = df['Age'].fillna(df['Age'].median())
+
+# 把性别从文字变成数字
+df['Sex'] = df['Sex'].map({'male': 0, 'female': 1})
+
+X = df[features]
+y = df['Survived']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+```
+
+**这一步的思考过程比代码重要**：
+
+- 为什么用中位数而不是均值填Age？因为年龄分布可能偏斜，中位数不受极端值影响。
+- 为什么Sex要变成0/1？因为模型只能处理数字。
+- 为什么Pclass不需要归一化？因为它是排序特征（1>2>3），树模型对尺度不敏感。
+
+如果你不理解这些"为什么"，建议停下来，翻一下 [d2l-zh](https://github.com/d2l-ai/d2l-zh) 第4章（线性回归）和第5章（多层感知机）。那些公式在这里会变成"哦，原来是干这个用的"。
+
+---
+
+## 训练和评估：看模型实际表现
+
+```
+model = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+print(classification_report(y_test, y_pred))
+```
+
+输出大概是这样的（你的数字可能略有浮动，因为随机种子不同）：
+
+```
+              precision    recall  f1-score   support
+           0       0.78      0.88      0.83       105
+           1       0.79      0.65      0.71        74
+
+    accuracy                           0.78       179
+   macro avg       0.78      0.76      0.77       179
+weighted avg       0.78      0.78      0.78       179
+```
+
+一个不到20行代码的模型，准确率 78% 左右。这对第一个模型来说是完全正常的。
+
+**怎么看这四个指标**：
+- **precision**：模型说"这个人没活"时，78% 是对的。说"这个人活了"时，79% 是对的。
+- **recall**：所有没活的人里，模型找出了 88%。所有活下来的人里，模型找出了 65%。
+- **f1-score**：precision 和 recall 的调和平均，越接近 1 越好。
+- **support**：测试集里实际的人数。这里 105 人没活、74 人活下来了。
+
+更重要的不是分数本身，而是你理解了整个流程：**读数据 → 清理 → 选特征 → 训练 → 评估**。这条Pipeline在以后无论你做什么ML项目，甚至做大模型微调，都会反复出现。
+
+---
+
+## 现在你该做什么
+
+跑通上面的代码之后，你有三条路可以选：
+
+**第一条：把同样的流程用在其他数据集上。**
+
+Kaggle上搜索"Titanic"的同类比赛，或者换一个更现代的数据集——比如Wine Quality、Iris。用同样的代码结构跑一遍，你会发现90%的代码不用改，改的只是数据列名和特征选择。
+
+**第二条：理解你刚用了什么算法。**
+
+随机森林是"很多棵决策树投票"——听起来简单，但里面涉及Bagging、特征随机采样、OOB评估。去 [ML-From-Scratch](https://github.com/eriklindernoren/ML-From-Scratch) 打开 `random_forest.py`，你会发现核心逻辑只有几十行循环。读一遍你就能说清楚"随机森林和单棵决策树的区别是什么"——面试高频题。
+
+**第三条：了解Scikit-learn的全貌。**
+
+[Scikit-learn官方文档](https://scikit-learn.org/stable/) 的中文翻译版在 [sklearn-doc-zh](https://github.com/apachecn/sklearn-doc-zh)。不用从头读到尾。遇到新问题时去搜——"怎么分训练集？"→ `train_test_split`，"怎么调参数？"→ `GridSearchCV`，"怎么评估分类器？"→ `classification_report`。用多了自然记住。
+
+---
+
+## 验收标准：跑通了吗？
+
+你的脚本应该能无报错地输出 `classification_report`。逐条检查：
+
+- [ ] `df.head()` 显示了表格数据（5 行 x 12 列）
+- [ ] `df.info()` 中的 Age 空值已被填充（显示 891 non-null）
+- [ ] `X_train` 和 `X_test` 的行数加起来等于 891（713 + 179）
+- [ ] `classification_report` 的 accuracy 在 0.75-0.85 之间
+- [ ] 没有报错 `ValueError: Input contains NaN`——说明空值处理干净了
+
+如果你的准确率低于 0.7，检查特征选择：是不是只用了 `Sex` 和 `Pclass` 两列？加上 `Age`、`Fare`、`SibSp` 通常能提升 5-10%。
+
+---
+
+## 参考项目
+
+这条 Pipeline 涉及的工具和进一步学习资源：
+
+[d2l-zh](https://github.com/d2l-ai/d2l-zh) 第4-6章 ：线性回归、MLP、模型选择的理论基础 
+[ML-From-Scratch](https://github.com/eriklindernoren/ML-From-Scratch)：读懂随机森林和决策树的纯NumPy实现 
+[sklearn-doc-zh](https://github.com/apachecn/sklearn-doc-zh)：Scikit-learn API的中文速查手册
+
+三个够了。重点是把上面那条Pipeline跑通、理解、复用，而不是再去Star另外十个仓库。
+
+---
+
+## 这篇之后
+
+你从"有一个 CSV 文件"走到了"训练出一个模型并知道它好不好用"。下一篇文章进入深度学习和 Transformer——从调 sklearn API 到手写一个神经网络，理解梯度下降到底在做什么，以及"Attention Is All You Need"那一张图到底在画什么。
+
+---
+
+> 本系列 Notebook 及配套文章：[github.com/ASPIRINH/hands-on-llm](https://github.com/ASPIRINH/hands-on-llm)
+
+---
+
+<details>
+<summary><b>常见问题</b></summary>
+
+**Q: `pandas.read_csv` 报 `SSL: CERTIFICATE_VERIFY_FAILED`？**
+A: 把 URL 换成本地文件。先下载 CSV：浏览器打开 `https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv`，保存为 `~/data/titanic.csv`，然后 `df = pd.read_csv('~/data/titanic.csv')`。
+
+**Q: `classification_report` 出来的全是 0 的分数？**
+A: 检查 `y_test` 的取值分布——如果用 `print(y_test.value_counts())` 发现全是同一类，说明 train/test 切分出了问题。检查 `random_state=42` 是否写对了，或者把 `test_size` 从 0.2 改成 0.3。
+
+**Q: 准确率只有 60% 多？**
+A: 正常。只用 Pclass 和 Sex 两列做特征就是这样。把 Age、Fare、SibSp 都加进去（上面的代码已包含），应该能到 80% 左右。如果你加了所有特征仍然低，检查 Age 的空值有没有处理干净。
+
+**Q: `ValueError: Input contains NaN, infinity or a value too large for dtype`？**
+A: 特征里还有空值。运行 `df[features].isna().sum()` 看看哪一列还有 NaN。Titanic 的 Age 和 Cabin 都有空值——代码里只填充了 Age，如果使用了其他列也可能有空值。
+
+**Q: 运行 `df.head()` 只显示了 3 列而不是 12 列？**
+A: 终端宽度不够。加一行 `pd.set_option('display.max_columns', 20)` 再运行 `df.head()`。
+
+</details>
