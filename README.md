@@ -26,7 +26,7 @@
 
 | Notebook | 阶段 | 核心内容 | 需要 GPU？ |
 |----------|------|---------|-----------|
-| [00-先磨刀](notebooks/00_先磨刀_30分钟搭好AI学习环境.ipynb) | 环境准备 | Python 虚拟环境、Ollama、d2l-zh 克隆、VS Code 配置 | 否 |
+| [00-先磨刀](notebooks/00_先磨刀_30分钟搭好AI学习环境.ipynb) | 环境准备 | 装Python、Ollama、d2l-zh 克隆、VS Code 配置 | 否 |
 | [01-站稳脚](notebooks/01_站稳脚_用Scikit-learn跑通Pipeline.ipynb) | 机器学习基础 | Scikit-learn Pipeline、特征工程、分类器评估 | 否 |
 | [02-拆解黑盒](notebooks/02_拆解黑盒_从d2l-zh到nanoGPT.ipynb) | 深度学习 & Transformer | PyTorch、d2l-zh 核心章节、注意力机制、nanoGPT | 推荐 |
 | [03-接上外脑](notebooks/03_接上外脑_从零搭建RAG系统.ipynb) | RAG | 向量化、向量数据库、检索+生成、RAG 评测 | 否 |
@@ -38,18 +38,13 @@
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/yourusername/hands-on-llm.git
+git clone https://github.com/ASPIRINH/hands-on-llm.git
 cd hands-on-llm
 
-# 2. 创建虚拟环境（推荐 Python 3.11+）
-python -m venv ai-env
-source ai-env/bin/activate   # Mac/Linux
-# ai-env\Scripts\activate    # Windows
+# 2. 安装依赖
+pip install -r requirements.txt
 
-# 3. 安装依赖
-pip install jupyter numpy pandas matplotlib scikit-learn
-
-# 4. 启动
+# 3. 启动
 jupyter notebook
 ```
 
@@ -78,6 +73,13 @@ jupyter notebook
 ## 📝 配套文章
 
 每个 Notebook 均配有完整文章（`output/` 目录），包含原理讲解、代码解读和常见问题。文章与 Notebook 配合使用：**先读文章理解思路，再跑 Notebook 动手实践**。
+
+| 阶段 | 文章 | Notebook |
+|------|------|----------|
+| 零：环境搭建 | [article_01_preparation.md](output/article_01_preparation.md) | [00-先磨刀](notebooks/00_先磨刀_30分钟搭好AI学习环境.ipynb) |
+| 一：ML Pipeline | [article_02_foundation.md](output/article_02_foundation.md) | [01-站稳脚](notebooks/01_站稳脚_用Scikit-learn跑通Pipeline.ipynb) |
+| 二：Transformer | [article_03_deep_learning.md](output/article_03_deep_learning.md) | [02-拆解黑盒](notebooks/02_拆解黑盒_从d2l-zh到nanoGPT.ipynb) |
+| 三：RAG | [article_04_rag.md](output/article_04_rag.md) | [03-接上外脑](notebooks/03_接上外脑_从零搭建RAG系统.ipynb) |
 
 ## ⚙️ 硬件要求
 
