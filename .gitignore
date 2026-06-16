@@ -18,6 +18,8 @@ env/
 .ipynb_checkpoints/
 */.ipynb_checkpoints/*
 
+.txt
+
 # IDE
 .vscode/
 .idea/
