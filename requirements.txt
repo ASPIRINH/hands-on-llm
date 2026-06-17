@@ -19,6 +19,7 @@ openai>=1.0
 langchain>=0.1
 langchain-community
 litellm>=1.0
+baidusearch>=0.1
 
 # 微调 (LLaMA-Factory 需另从 GitHub clone)
 transformers>=4.36
