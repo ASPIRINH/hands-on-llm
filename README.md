@@ -30,7 +30,7 @@
 | [01-站稳脚](notebooks/01_站稳脚_用Scikit-learn跑通Pipeline.ipynb) | 机器学习基础 | Scikit-learn Pipeline、特征工程、分类器评估 | 否 |
 | [02-拆解黑盒](notebooks/02_拆解黑盒_从d2l-zh到nanoGPT.ipynb) | 深度学习 & Transformer | PyTorch、d2l-zh 核心章节、注意力机制、nanoGPT | 推荐 |
 | [03-接上外脑](notebooks/03_接上外脑_从零搭建RAG系统.ipynb) | RAG | 向量化、向量数据库、检索+生成、RAG 评测 | 否 |
-| [04-赋予手脚](notebooks/04_从FunctionCalling到Multi-Agent.ipynb) | Agent | Function Calling、三种 Agent 写法、Multi-Agent 实战 | 否 |
+| [04-赋予手脚](notebooks/04_赋予手脚_从FunctionCalling到Multi-Agent.ipynb) | Agent | Function Calling、三种 Agent 写法、Multi-Agent 实战 | 否 |
 | [05-造轮子](notebooks/05_造自己的轮子_LLaMA-Factory微调一条龙.ipynb) | 微调 | LoRA/QLoRA、LLaMA-Factory、评测、量化、部署 | **需要** |
 | [06-走出文本](notebooks/06_走出文本_VLM与图像生成.ipynb) | 多模态（选学） | VLM 或 图像生成入门 | 选学 |
 
@@ -80,6 +80,9 @@ jupyter notebook
 | 一：ML Pipeline | [article_02_foundation.md](output/article_02_foundation.md) | [01-站稳脚](notebooks/01_站稳脚_用Scikit-learn跑通Pipeline.ipynb) |
 | 二：Transformer | [article_03_deep_learning.md](output/article_03_deep_learning.md) | [02-拆解黑盒](notebooks/02_拆解黑盒_从d2l-zh到nanoGPT.ipynb) |
 | 三：RAG | [article_04_rag.md](output/article_04_rag.md) | [03-接上外脑](notebooks/03_接上外脑_从零搭建RAG系统.ipynb) |
+| 四：Agent | [article_05_agent.md](output/article_05_agent.md) | [04-赋予手脚](notebooks/04_赋予手脚_从FunctionCalling到Multi-Agent.ipynb) |
+| 五：微调 | [article_06_finetuning.md](output/article_06_finetuning.md) | [05-造轮子](notebooks/05_造自己的轮子_LLaMA-Factory微调一条龙.ipynb) |
+| 六：多模态 | [article_07_multimodal.md](output/article_07_multimodal.md) | [06-走出文本](notebooks/06_走出文本_VLM与图像生成.ipynb) |
 
 ## ⚙️ 硬件要求
 

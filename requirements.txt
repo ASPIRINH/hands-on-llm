@@ -28,10 +28,12 @@ accelerate>=0.24
 peft>=0.6
 trl>=0.7
 wandb>=0.16
+openpyxl>=3.1
 
 # 多模态
 diffusers>=0.24
 Pillow>=10.0
+qwen-vl-utils
 
 # 通用
 jupyter>=1.0
